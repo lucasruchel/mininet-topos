@@ -30,7 +30,6 @@ def emptyNet():
     net.addLink(s4,s2)
 
 
-    net.addLink(s4,s2)
     net.addLink(s2,s1)
 
     net.addLink(s1,s3)

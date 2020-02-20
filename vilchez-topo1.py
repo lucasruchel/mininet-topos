@@ -4,9 +4,17 @@ from mininet.net import Mininet
 from mininet.node import RemoteController,OVSSwitch
 from mininet.cli import CLI
 from mininet.log import setLogLevel, info
+from mininet.link import TCIntf, TCLink
+
+from functools import partial
+
+
+import os
 
 def emptyNet():
-    net = Mininet(controller=RemoteController, switch=OVSSwitch)
+    switch = partial( OVSSwitch, protocols='OpenFlow13' )
+    link = partial(TCLink, bw=10)
+    net = Mininet(controller=RemoteController, switch=switch, link=link)
 
     controllers = []
  
@@ -56,9 +64,15 @@ def emptyNet():
     s4.start(controllers)
     s5.start(controllers)
     s6.start(controllers)
+    
 
 
     net.start()
+
+
+    os.system("killall netserver  2>&1")
+    h3.cmd("netserver -4 -p 50500")
+
     CLI(net)
     net.stop()
 

@@ -70,11 +70,11 @@ def emptyNet():
     net.start()
 
 
-    os.system("killall netserver  2>&1")
     h3.cmd("netserver -4 -p 50500")
 
     CLI(net)
     net.stop()
+    os.system("killall netserver  2>&1")
 
 if __name__ == "__main__":
     setLogLevel("info")

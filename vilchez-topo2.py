@@ -13,7 +13,7 @@ import os
 
 def emptyNet():
     switch = partial( OVSSwitch, protocols='OpenFlow13' )
-    link = partial(TCLink, bw=10)
+    link = partial(TCLink, bw=100)
     net = Mininet(controller=RemoteController, switch=switch, link=link)
 
     controllers = []

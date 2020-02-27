@@ -54,17 +54,10 @@ def emptyNet():
     
     net.build()
     
-    for c in range(len(controllers)):
-        controllers[c].start()
+#    for c in range(len(controllers)):
+#        controllers[c].start()
 
 
-    s1.start(controllers)
-    s2.start(controllers)
-    s3.start(controllers)
-    s4.start(controllers)
-    s5.start(controllers)
-    s6.start(controllers)
-    
 
 
     net.start()

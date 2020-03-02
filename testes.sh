@@ -3,7 +3,7 @@
 for i in $(seq 10); do
 
 ## Recria o cluster
-~/onos-docker/createCluster
+~/onos-docker/manyLocations
 
 ## Inicia topologia e testes
 sudo ./spineleaf-topo.py

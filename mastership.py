@@ -13,7 +13,7 @@ from os import path, mkdir
 def trigger():
     auth = HTTPBasicAuth('onos','rocks')
 
-    D_API = 'http://172.25.0.3:8181/onos/v1'
+    D_API = 'http://172.17.0.5:8181/onos/v1'
 
     result = requests.get(D_API+'/devices', auth=auth)
 
@@ -24,7 +24,7 @@ def trigger():
 
     mastership_req = {
              "deviceId": "of:0000000000000002",
-             "nodeId": "172.25.0.3",
+             "nodeId": "172.17.0.5",
              "role": "MASTER",
         }
     headers = {'content-type': 'application/json'}
@@ -57,11 +57,11 @@ class MasterCheck(Thread):
 
         auth = HTTPBasicAuth('onos','rocks')
         
-        D_API = 'http://172.23.0.3:8181/onos/v1'
+        D_API = 'http://172.17.0.6:8181/onos/v1'
 
         result = requests.get(D_API+("/mastership/%s/master" % self.node), auth=auth)
 
-        curr_master = "172.25.0.3"
+        curr_master = "172.17.0.5"
         tstart = time()
 
         nro_requests = 0
@@ -84,7 +84,7 @@ def checkStart():
 
     auth = HTTPBasicAuth('onos','rocks')
 
-    D_API = 'http://172.23.0.3:8181/onos/v1'
+    D_API = 'http://172.17.0.5:8181/onos/v1'
 
     result = requests.get(D_API+'/devices', auth=auth)
 

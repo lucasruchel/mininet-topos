@@ -6,7 +6,7 @@ for i in $(seq 10); do
 ~/onos-docker/manyLocations
 
 ## Inicia topologia e testes
-sudo ./spineleaf-topo.py
+sudo ./spineleaf-topo-dsites.py
 
 ## Limpa containers
 docker container kill $(docker ps -q) && docker container rm $(docker ps -a -q)

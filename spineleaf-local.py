@@ -14,43 +14,47 @@ import os
 import time
 
 from mastership_failover import failover
+from mastership import changeTime
 from tcpdump import capture
-
-from flows import Flows
-
-controllers = []
 
 def emptyNet():
     switch = partial( OVSSwitch, protocols='OpenFlow13' )
     link = partial(TCLink, bw=100)
     topo = SpineLeaf(leaves=3)
-    f = Flows()
 
     net = Mininet(controller=RemoteController, switch=switch, link=link, topo=topo, build=False, autoSetMacs=True)
 
-    controllers.append(net.addController('c1', controller=RemoteController, ip="172.17.0.5", port=6633))
-    controllers.append(net.addController('c2', controller=RemoteController, ip="172.17.0.6", port=6633))
-    controllers.append(net.addController('c3', controller=RemoteController, ip="172.17.0.7", port=6633))
+    controllers = []
+ 
+    controllers.append(net.addController('c1', controller=RemoteController, ip="192.168.247.210", port=6633))
 
-    capture("inicio-conexao-com-testes","docker0",timeout=30)
+
+
+#    capture("captura-3-nodes-odl","eno1",timeout=60)
 
     net.build()
     net.start()
-
-    
-    f.test()
-
 
     h1 = net.getNodeByName("h1")
     h3 = net.getNodeByName("h3")
 
 
+#    devs = failover()
 
-    os.system("killall tcpdump")
-#    CLI(net)
+#    os.system("docker kill onos-1")
+#    changeTime(devs)
+
+#    h1.cmdPrint("ping -c 20 %s" % h3.IP()) 
+
+
+ #  os.system("killall tcpdump")
+
+    CLI(net)
     net.stop()
+
+
 
 if __name__ == "__main__":
     setLogLevel("info")
     emptyNet()
- 
+

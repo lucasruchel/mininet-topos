@@ -18,7 +18,7 @@ def emptyNet():
 
     controllers = []
  
-    controllers.append(net.addController('c1', controller=RemoteController, ip="172.17.0.5", port=6633))
+    controllers.append(net.addController('c1', controller=RemoteController, ip="192.168.247.210", port=6633))
     controllers.append(net.addController('c2', controller=RemoteController, ip="172.17.0.6", port=6633))
     controllers.append(net.addController('c3', controller=RemoteController, ip="172.17.0.7", port=6633))
 

@@ -77,7 +77,22 @@ class MasterCheck(Thread):
 
         logging.info("%s:Tempo para novo master is %s -- requests: %d" % (self.node,str(tend - tstart),nro_requests))
     
+
+def changeTime(nodes=[]):
+    log_path = "capturas/master_change_time.log"
+    threads = []
+    for n in nodes:
+        print(n)
         
+        t = MasterCheck(n,log_path)
+        t.start()
+        threads.append(t)
+
+    for t in threads:
+        t.join()
+
+    
+
 def checkStart():
     log_dir = "capturas/"
     log_file = "mastership_changeTime_log_%s.txt"

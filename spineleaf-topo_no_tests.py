@@ -31,24 +31,24 @@ def emptyNet():
     controllers.append(net.addController('c2', controller=RemoteController, ip="172.17.0.6", port=6633))
     controllers.append(net.addController('c3', controller=RemoteController, ip="172.17.0.7", port=6633))
 
-    capture("inicio-conexao-com-testes","docker0",timeout=120)
+#    capture("inicio-conexao-com-testes","docker0",timeout=120)
 
     net.build()
     net.start()
 
-    failover()
+#    failover()
     
-    os.system(command_master)
+#    os.system(command_master)
 
-    os.system("docker kill onos-1")
+#    os.system("docker kill onos-1")
 
-    os.system(command)
+#    os.system(command)
 
     h1 = net.getNodeByName("h1")
     h3 = net.getNodeByName("h3")
 
-    os.system("docker start onos-1")
-    os.system("killall tcpdump")
+#    os.system("docker start onos-1")
+ #   os.system("killall tcpdump")
 
     CLI(net)
     net.stop()

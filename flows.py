@@ -16,11 +16,11 @@ class Flows():
 
         CLUSTER_INFO = "/cluster"
 
-        node = self.API % "172.17.0.5"
+        node = self.API % "192.168.247.210"
         cluster = requests.get(node+CLUSTER_INFO, auth=self.auth)
 
 
-        logging.basicConfig(filename="tempo_sincronia.log", level=logging.DEBUG)
+        logging.basicConfig(filename="capturas/tempo_sincronia.log", level=logging.INFO)
 
         self.nodes = []
         for h in cluster.json()['nodes']:
@@ -43,8 +43,8 @@ class Flows():
 
             f_base = n_flows[self.nodes[0]]
 
-            print("*"*100)
-            print(f_base)
+            #print("*"*100)
+            #print(f_base)
             consistent = True
             for h in self.nodes[1:]:
                 if f_base != n_flows[h]:
@@ -54,15 +54,15 @@ class Flows():
         t_end = time()	
         synchronized = "Consistente em: %s s" % (t_end - t_start)
         print(synchronized)
-        logging.debug(synchronized)
+        logging.info(synchronized)
 
 
     def add_flow(self,of_dev,flow):
         REQUEST = "/flows?appId=rest"
         headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
 
-        result = requests.post((self.API+REQUEST) % '172.17.0.5', json=flow, auth=self.auth, headers=headers)
-        print(result.status_code)
+        result = requests.post((self.API+REQUEST) % '192.168.247.210', json=flow, auth=self.auth, headers=headers)
+#        print(result.status_code)
 
     def test(self):
         base_mac = "00:00:11:00:00:%02x"
@@ -84,7 +84,7 @@ class Flows():
                     {
                         "type": "ETH_SRC",
                         "mac": "00:00:11:00:00:%02x"
-                    },
+                        },
                     {
                         "type": "ETH_DST",
                         "mac": "00:00:11:00:00:01"

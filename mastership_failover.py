@@ -18,14 +18,21 @@ def failover():
     devices = result.json()['devices']
 
     threads = []
+    devs = []
     for dev in devices:
         t = MasterChange(dev['id'],'172.17.0.5')
+        devs.append(dev['id'])
+
         t.start()
         print("iniciando Thread para %s" % dev['id'])
         threads.append(t)
 
     for t in threads:
         t.join()
+
+    return devs
+
+    
 
 
 class MasterChange(Thread):
@@ -52,7 +59,7 @@ class MasterChange(Thread):
         if (result.status_code != 200):
             print("Erro de comunicacao")
             return
-        	
+        
         result = requests.get(self.D_API+('/mastership/%s/master' % self.of_dev), auth=self.auth)
         while (result.json()['nodeId'] != self.node_id):
             sleep(1)

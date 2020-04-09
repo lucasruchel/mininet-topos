@@ -13,7 +13,8 @@ from topos import SpineLeaf
 import os
 import time
 
-from mastership import trigger, checkStart
+from mastership_failover import failover
+from mastership import changeTime
 from tcpdump import capture
 
 def emptyNet():
@@ -31,7 +32,7 @@ def emptyNet():
 
 
 
-    capture("inicio-conexao-com-testes","docker0",timeout=60)
+#    capture("captura-3-nodes-odl","eno1",timeout=60)
 
     net.build()
     net.start()
@@ -39,16 +40,16 @@ def emptyNet():
     h1 = net.getNodeByName("h1")
     h3 = net.getNodeByName("h3")
 
-    time.sleep(6)
 
-    trigger()
+#    devs = failover()
 
-    os.system("docker container stop onos-3")
+#    os.system("docker kill onos-1")
+#    changeTime(devs)
 
-    h1.cmdPrint("ping -c 10 %s" % h3.IP()) 
+    h1.cmdPrint("ping -c 20 %s" % h3.IP()) 
 
 
-    os.system("killall tcpdump")
+ #  os.system("killall tcpdump")
 
     CLI(net)
     net.stop()

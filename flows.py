@@ -9,6 +9,8 @@ import logging
 from os import path, mkdir
 import json
 
+from mastership_failover import failover
+
 class Flows():
     def __init__(self):
         self.auth = HTTPBasicAuth('onos','rocks')
@@ -16,15 +18,15 @@ class Flows():
 
         CLUSTER_INFO = "/cluster"
 
-        node = self.API % "192.168.247.210"
-        cluster = requests.get(node+CLUSTER_INFO, auth=self.auth)
+        node = self.API % "172.17.0.5"
+#        cluster = requests.get(node+CLUSTER_INFO, auth=self.auth)
 
 
-        logging.basicConfig(filename="capturas/tempo_sincronia.log", level=logging.INFO)
+#        logging.basicConfig(filename="capturas/tempo_sincronia.log", level=logging.INFO)
 
-        self.nodes = []
-        for h in cluster.json()['nodes']:
-            self.nodes.append(h['ip'])
+#        self.nodes = []
+#        for h in cluster.json()['nodes']:
+#            self.nodes.append(h['ip'])
 
 
     def flows(self):
@@ -61,8 +63,8 @@ class Flows():
         REQUEST = "/flows?appId=rest"
         headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
 
-        result = requests.post((self.API+REQUEST) % '192.168.247.210', json=flow, auth=self.auth, headers=headers)
-#        print(result.status_code)
+        result = requests.post((self.API+REQUEST) % '172.17.0.5', json=flow, auth=self.auth, headers=headers)
+        print(result.json())
 
     def test(self):
         base_mac = "00:00:11:00:00:%02x"
@@ -71,7 +73,7 @@ class Flows():
             "priority": 40000,
             "timeout": 0,
             "isPermanent": "true",
-            "deviceId": "of:0000000000000003",
+            "deviceId": "of:0000000000000001",
             "treatment": {
                 "instructions": [
                 {
@@ -100,7 +102,7 @@ class Flows():
         flows = {"flows" : [] }
 
 
-        for i in range(2,255):
+        for i in range(2,3):
             f = flow.copy()
             f['selector']['criteria'][0]['mac'] = base_mac % i
             bug = json.dumps(f)
@@ -108,17 +110,20 @@ class Flows():
             flows['flows'].append(json.loads(bug))
 
         
-        self.add_flow("of:0000000000000003",flows)
-        self.flows()
+        self.add_flow("of:0000000000000001",flows)
+#        self.flows()
 
     
 
 
-if __name__ == "__main__":
-        
-        f = Flows()
-        f.test()
+def executor(n_control):
+     failover(n_control)
+     
+     f = Flows()
+     f.test()
 
+if __name__ == "__main__":
+     executor()
 
 
 

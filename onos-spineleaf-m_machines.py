@@ -14,6 +14,8 @@ import os
 import time
 
 from mastership_failover import failover
+from flows import Flows
+
 from mastership import changeTime
 from tcpdump import capture
 
@@ -26,24 +28,29 @@ def emptyNet():
 
     controllers = []
  
-    controllers.append(net.addController('c1', controller=RemoteController, ip="172.18.0.6", port=6633))
-    controllers.append(net.addController('c2', controller=RemoteController, ip="172.18.0.3", port=6633))
-    controllers.append(net.addController('c3', controller=RemoteController, ip="172.18.0.5", port=6633))
+    controllers.append(net.addController('c1', controller=RemoteController, ip="192.168.247.212", port=6633))
+    controllers.append(net.addController('c2', controller=RemoteController, ip="192.168.247.213", port=6633))
+    controllers.append(net.addController('c3', controller=RemoteController, ip="192.168.247.214", port=6633))
+
+#    controllers.append(net.addController('c1', controller=RemoteController, ip="192.168.247.210", port=6633))
 
 
+#    f = Flows()
 
-#    capture("captura-3-nodes-odl-magnesium","eno1",timeout=60)
+#    capture("captura-3-nodes-odl-magnesium-events","eno1",timeout=180)
 
     net.build()
     net.start()
 
-    h1 = net.getNodeByName("h1")
-    h3 = net.getNodeByName("h3")
+#    h1 = net.getNodeByName("h1")
+#    h3 = net.getNodeByName("h3")
 
+#    time.sleep(15)
 
- #   devs = failover()
-    
- #   time.sleep(5)
+#    devs = failover()
+#    f.test()
+
+#   time.sleep(5)
 
  #   for i in range(5,8):
  #       os.system("ssh onos@172.17.0.{0} -p 8101 -o StrictHostKeyChecking=no events -m > log_mastership_{0}.ini".format(str(i)))
@@ -64,13 +71,14 @@ def emptyNet():
 
     
 #    time.sleep(25)
-#    os.system("killall tcpdump")
+
 
 
     CLI(net)
     net.stop()
 
 
+#    os.system("killall tcpdump")
 
 if __name__ == "__main__":
     setLogLevel("info")

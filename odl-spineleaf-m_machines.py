@@ -26,13 +26,13 @@ def emptyNet():
 
     controllers = []
  
-    controllers.append(net.addController('c1', controller=RemoteController, ip="172.18.0.6", port=6633))
-    controllers.append(net.addController('c2', controller=RemoteController, ip="172.18.0.3", port=6633))
-    controllers.append(net.addController('c3', controller=RemoteController, ip="172.18.0.5", port=6633))
+    controllers.append(net.addController('c1', controller=RemoteController, ip="192.168.247.212", port=6633))
+    controllers.append(net.addController('c2', controller=RemoteController, ip="192.168.247.213", port=6633))
+    controllers.append(net.addController('c3', controller=RemoteController, ip="192.168.247.214", port=6633))
 
 
 
-#    capture("captura-3-nodes-odl-magnesium","eno1",timeout=60)
+    capture("captura-3-nodes-odl-magnesium-events","eno1",timeout=180)
 
     net.build()
     net.start()
@@ -64,13 +64,14 @@ def emptyNet():
 
     
 #    time.sleep(25)
-#    os.system("killall tcpdump")
+
 
 
     CLI(net)
     net.stop()
 
 
+    os.system("killall tcpdump")
 
 if __name__ == "__main__":
     setLogLevel("info")

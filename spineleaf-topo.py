@@ -32,48 +32,48 @@ def emptyNet():
     net.build()
     net.start()
 
-    trigger()
+#    trigger()
 
-    time.sleep(5)
+#    time.sleep(5)
 
     h1 = net.getNodeByName("h1")
     h3 = net.getNodeByName("h3")
 
 
-    log_output = "iperf_log_"
-    log_index = 1
-    log_dir = "capturas/"
-    log_path = log_dir+log_output+str(log_index)
+ #   log_output = "iperf_log_"
+ #   log_index = 1
+ #   log_dir = "capturas/"
+ #   log_path = log_dir+log_output+str(log_index)
 
-    while os.path.exists(log_path):
-        log_index += 1
-        log_path = log_dir+log_output+str(log_index)
+ #   while os.path.exists(log_path):
+ #       log_index += 1
+ #       log_path = log_dir+log_output+str(log_index)
 
-    if not os.path.exists(log_dir):
-        os.mkdir(log_dir)
+ #   if not os.path.exists(log_dir):
+ #       os.mkdir(log_dir)
         
 
 #    h3.cmdPrint("iperf -s -p 3434 &")
-    h3.cmdPrint("iperf --udp -s -p 3434 &")
+#    h3.cmdPrint("iperf --udp -s -p 3434 &")
 #    h1.cmdPrint("iperf -c 10.0.0.3 -p 3434 -t 60 -b 100000000")
-    h1.cmdPrint("iperf -c 10.0.0.3 --udp -p 3434 -t 50 -b 100000000 >> %s &" % (log_path))
+#    h1.cmdPrint("iperf -c 10.0.0.3 --udp -p 3434 -t 50 -b 100000000 >> %s &" % (log_path))
     
-    capture("falha-controlador-s3-eth2","s3-eth2",timeout=40)            
-    capture("falha-controlador-s3-eth1","s3-eth1",timeout=40)            
+#    capture("falha-controlador-s3-eth2","s3-eth2",timeout=40)            
+#    capture("falha-controlador-s3-eth1","s3-eth1",timeout=40)            
 
-    time.sleep(15)
+#    time.sleep(15)
 
 
 
-    os.system("docker container stop onos-3")
+#    os.system("docker container stop onos-3")
 
-    checkStart()
+#    checkStart()
 
-    time.sleep(15)
+#    time.sleep(15)
     
-#    CLI(net)
+    CLI(net)
     net.stop()
-    os.system("killall iperf  2>&1")
+#    os.system("killall iperf  2>&1")
 
 if __name__ == "__main__":
     setLogLevel("info")

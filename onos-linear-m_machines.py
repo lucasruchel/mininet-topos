@@ -47,10 +47,10 @@ def emptyNet(n_control=3):
 
     time.sleep(5*n_control)
 
-   #Define o master, aguarda estabilidade dos backups e envia fluxo
+   #Define o master, aguarda estabilidade dos backups e envia fluxos por 60 segundos
     executor(n_control)
 
-    
+    # Tempo maximo para alcancar sincronia    
     time.sleep(15)
 
 

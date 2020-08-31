@@ -4,12 +4,38 @@ from requests.auth import HTTPBasicAuth
 
 from time import sleep, time
 from threading import Thread
+from datetime import datetime
 
 import logging
 from os import path, mkdir
 import json
 
 from mastership_failover import failover
+
+class MacGenerator():
+    def __init__(self):
+        self.mac_value = 0
+
+
+    def format_mac(self,mac):
+
+	# convert mac in canonical form (eg. 00:80:41:ae:fd:7e)
+        mac = ":".join(["%s" % (mac[i:i+2]) for i in range(0, 12, 2)])
+
+        return mac
+
+
+
+    def increment(self):
+        self.mac_value += 1
+        mac = "{:012X}".format(int("0", 16) + self.mac_value)
+
+        return self.format_mac(mac)
+
+
+	
+
+
 
 class Flows():
     def __init__(self):
@@ -19,57 +45,10 @@ class Flows():
         CLUSTER_INFO = "/cluster"
 
         node = self.API % "172.17.0.5"
-#        cluster = requests.get(node+CLUSTER_INFO, auth=self.auth)
 
+        self.generator = MacGenerator()
 
-#        logging.basicConfig(filename="capturas/tempo_sincronia.log", level=logging.INFO)
-
-#        self.nodes = []
-#        for h in cluster.json()['nodes']:
-#            self.nodes.append(h['ip'])
-
-
-    def flows(self):
-        FLOWS = "/flows"
-
-        consistent = False
-        n_flows = {}
-
-        print("verificando consistencia...")
-        t_start = time()
-        while (not consistent):
-            for h in self.nodes:
-                r = requests.get((self.API + FLOWS) % h, auth=self.auth)
-                n_flows[h] = r.json()
-
-
-            f_base = n_flows[self.nodes[0]]
-
-            #print("*"*100)
-            #print(f_base)
-            consistent = True
-            for h in self.nodes[1:]:
-                if f_base != n_flows[h]:
-                    consistent = False
-
-        # Tempo em que foi alcancado a consistencia da visao de fluxos entre os controladores
-        t_end = time()	
-        synchronized = "Consistente em: %s s" % (t_end - t_start)
-        print(synchronized)
-        logging.info(synchronized)
-
-
-    def add_flow(self,of_dev,flow):
-        REQUEST = "/flows?appId=rest"
-        headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
-
-        result = requests.post((self.API+REQUEST) % '172.17.0.5', json=flow, auth=self.auth, headers=headers)
-        print(result.json())
-
-    def test(self):
-        base_mac = "00:00:11:00:00:%02x"
-
-        flow = {
+        self.flow = {
             "priority": 40000,
             "timeout": 0,
             "isPermanent": "true",
@@ -98,32 +77,53 @@ class Flows():
                 ]
             }
         }
-        
-        flows = {"flows" : [] }
+ 
 
 
-        for i in range(2,3):
-            f = flow.copy()
-            f['selector']['criteria'][0]['mac'] = base_mac % i
+
+    def add_flow(self,of_dev,flow):
+        REQUEST = "/flows/%s?appId=rest" % of_dev
+        headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
+
+        result = requests.post((self.API+REQUEST) % '172.17.0.5', json=flow, auth=self.auth, headers=headers)
+
+    def test(self):
+
+        t = datetime.now()
+        while((datetime.now() - t).total_seconds() < 180):
+            f = self.flow.copy()
+            f['selector']['criteria'][0]['mac'] = self.generator.increment()
             bug = json.dumps(f)
 
-            flows['flows'].append(json.loads(bug))
+            self.add_flow("of:0000000000000001",json.loads(bug))
 
-        
-        self.add_flow("of:0000000000000001",flows)
-#        self.flows()
+        print("Fluxos enviados: %s" % self.generator.mac_value)
+
+    def single(self):
+        f = self.flow.copy()
+        f['selector']['criteria'][0]['mac'] = self.generator.increment()
+        bug = json.dumps(f)
+
+        self.add_flow("of:0000000000000001",json.loads(bug))
+
+        print("Fluxos enviados: %s" % self.generator.mac_value)
+
 
     
 
 
-def executor(n_control):
+def executor(n_control=3,unique=False):
      failover(n_control)
      
      f = Flows()
-     f.test()
+
+     if (unique):
+         f.single()
+     else:
+         f.test()
 
 if __name__ == "__main__":
-     executor()
+     executor(n_control=3)
 
 
 

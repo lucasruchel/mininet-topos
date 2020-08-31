@@ -45,13 +45,15 @@ def emptyNet(n_control=3):
     net.build()
     net.start()
 
-    time.sleep(5*n_control)
+    time.sleep(n_control)
 
+    
+    print("Enviando fluxos")
    #Define o master, aguarda estabilidade dos backups e envia fluxo
     executor()
 
-    
-    time.sleep(30)
+    print("Aguardando instalacao de fluxos")   
+    time.sleep(10)
 
 
 #    CLI(net)

@@ -19,12 +19,12 @@ class MacGenerator():
 
 
     def format_mac(self,mac):
-	# convert mac in canonical form (eg. 00:80:41:ae:fd:7e)
-	mac = ":".join(["%s" % (mac[i:i+2]) for i in range(0, 12, 2)])
+      # convert mac in canonical form (eg. 00:80:41:ae:fd:7e)
+      mac = ":".join(["%s" % (mac[i:i+2]) for i in range(0, 12, 2)])
 
 
         
-	return mac
+      return mac
 
 
 
@@ -35,6 +35,7 @@ class MacGenerator():
         mac = "{:012X}".format(int("0", 16) + self.mac_value)
         
         self.lock.release()
+        
         return self.format_mac(mac)
 
 

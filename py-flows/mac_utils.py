@@ -22,4 +22,10 @@ class MacGenerator():
 
       self.lock.release()
         
-      return mac 
+      return mac
+
+
+   def getMAC(self):
+      return self.format_mac(self.increment())
+
+

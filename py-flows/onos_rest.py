@@ -2,6 +2,7 @@
 
 import requests
 import threading
+import json
   
 from requests.auth import HTTPBasicAuth
 
@@ -13,6 +14,8 @@ from mac_utils import MacGenerator
 
 class Connection():
    def __init__(self,of_dev,controller):
+        self.DEBUG = False
+
         self.session = requests.Session()
 
         self.headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
@@ -29,6 +32,13 @@ class Connection():
 
    def doRequest(self,flow):
       result = self.session.post(self.url, json=flow, auth=self.auth, headers=self.headers)
+
+      if (self.DEBUG):
+          print("{url}".format(url=self.url))
+          print("{json}".format(json=flow))
+          print(result)
+
+      return result.status_code
 
 
 class Flows():
@@ -68,7 +78,7 @@ class Flows():
 
    def createFlow(self):
       f = self.bFlow.copy()
-      f['selector']['criteria'][0]['mac'] = self.generator.increment()
+      f['selector']['criteria'][0]['mac'] = self.generator.getMAC()
         
       return f
 
@@ -89,7 +99,10 @@ class Executor(threading.Thread):
    def run(self):
       while(self.active):
          # Cria flow e faz requisição ao controlador
-         self.connection.doRequest(self.flows.createFlow())
+         result = self.connection.doRequest(self.flows.createFlow())
+
+         if (not(result == 200 or result == 201)):
+             break
          
          
 
@@ -101,22 +114,30 @@ if __name__ == "__main__":
    of_dev="of:0000000000000001"
      
    # Controlador para envio de fluxos
-   controller = "192.168.247.125"
+   controller = "192.168.247.126"
      
    # tempo de execução em segundos
-   execution_time = 300
+   execution_time = 10
+
+   n_threads = 256
 
    # Criação dos jobs
    threads = []
-   for i in range(128):
+   for i in range(n_threads):
       t = Executor(of_dev,controller,generator)
       threads.append(t)
-      t.start()
+
+   for i in range(n_threads):
+      threads[i].start()
     
    t = datetime.now()
-   while((datetime.now() - t).total_seconds() >= execution_time):
+   while((datetime.now() - t).total_seconds() <= execution_time):
+       print("Executando à ",(datetime.now() - t).total_seconds())
+       sleep(1)
+   else:
       for t in threads:
          t.active = False
+ 
          
    for t in threads:
       t.join()

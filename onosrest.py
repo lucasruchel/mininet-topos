@@ -121,6 +121,7 @@ class Tester():
 
         ini_ip = 125
         self.n = n
+        self.execution_time = execution_time
 
         self.generators = []
 
@@ -145,32 +146,38 @@ class Tester():
 
 
             for n in range(n_threads):
-                t = Executor(of_dev,controller,generators[i])
-                threads.append(t)
+                t = Executor(of_dev,controller,self.generators[i])
+                self.threads.append(t)
 
 
     def start(self):
         # inicia as threads de envio para todos os controladores
-        for t in threads:
+        for t in self.threads:
             t.start()
 
-        for i in range(len(threads)):
-            threads[i].started = True
+        
+        print("iniciando threads de envio de fluxos")
+        for i in range(len(self.threads)):
+            self.threads[i].started = True
+
 
         t = datetime.now()
-        while((datetime.now() - t).total_seconds() <= execution_time):
-            print("Executando à ",(datetime.now() - t).total_seconds())
+        while((datetime.now() - t).total_seconds() <= self.execution_time):
+            #print("Executando à ",(datetime.now() - t).total_seconds())
             sleep(1)
         else:
-            for t in threads:
+            # execucao completa
+            print("execucacao completa, parando threads")
+
+            for t in self.threads:
                 t.active = False
 
-        for t in threads:
+        for t in self.threads:
             t.join()
 
 
         n_flows = 0
-        for g in generators:
+        for g in self.generators:
             n_flows += g.mac_value
 
         print("Fluxos enviados: %s" % n_flows)

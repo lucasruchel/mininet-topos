@@ -21,7 +21,9 @@ from flows import Flows
 
 controllers = []
 
-def emptyNet():
+from onosrest import Tester
+
+def topology():
     switch = partial( OVSSwitch, protocols='OpenFlow13' )
 
     topo = LinearTopo(k=3, n=1)
@@ -38,11 +40,15 @@ def emptyNet():
     net.build()
     net.start()
 
-    
-    CLI(net)
+    time.sleep(10)
+
+    tester = Tester()
+    tester.start()
+
+    time.sleep(10)
+    # Desnecessario visto que será automático
+    #CLI(net)
     net.stop()
 
 if __name__ == "__main__":
-    setLogLevel("info")
-    emptyNet()
- 
+    topology()

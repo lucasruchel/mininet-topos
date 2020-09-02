@@ -24,7 +24,7 @@ controllers = []
 def emptyNet():
     switch = partial( OVSSwitch, protocols='OpenFlow13' )
 
-    topo = LinearTopo(k=2, n=2)
+    topo = LinearTopo(k=3, n=1)
 
     f = Flows()
 

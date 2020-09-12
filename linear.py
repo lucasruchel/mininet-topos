@@ -23,12 +23,13 @@ from flows import Flows
 
 controllers = []
 
-import onosrest as Rest
+import onosrest as OnosRest
+import odlrest as OdlRest
 
 def topology(n=3):
     switch = partial( OVSSwitch, protocols='OpenFlow13' )
 
-    topo = LinearTopo(k=3, n=1)
+    topo = LinearTopo(k=n, n=1)
 
     f = Flows()
 
@@ -43,16 +44,19 @@ def topology(n=3):
 
     time.sleep(10)
 
-    tester = Rest.Tester(n=n, execution_time=300)
+
+    tester = OnosRest.Tester(n=n, execution_time=300)
+#    tester = OdlRest.Tester(n=n, execution_time=300)
     tester.start()
 
     time.sleep(10)
 
     # Desnecessario visto que sera automatico
-#    CLI(net)
+    #CLI(net)
     net.stop()
 
 if __name__ == "__main__":
+    setLogLevel("info")
     if (len(sys.argv) == 2):
         topology(n=int(sys.argv[1]))
     else:

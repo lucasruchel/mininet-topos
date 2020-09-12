@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 import requests
 import threading
 
@@ -29,15 +31,20 @@ class Connection():
         self.API = self.API.format(node=controller,of=of_dev)
 
         self.auth = HTTPBasicAuth('admin','admin')        # usuario de autenticacao
-        self.url = self.API + self.REQUEST              # URL completa para requisição
 
    def doRequest(self,flow):
       url = self.API.format(id=flow['flow'][0]['id'])
-      result = self.session.post(url, json=flow, auth=self.auth, headers=self.headers)
+
+#      bug = json.dumps(flow)
+#      flow = json.loads(bug)
+      
+      result = self.session.put(url, json=flow, auth=self.auth, headers=self.headers)
 
       if (self.DEBUG):
-          print("{url}".format(url=self.url))
+          print("URL: {url}".format(url=url))
           print("{json}".format(json=flow))
+          print("HEADERS: {head}".format(head=self.headers))
+          print("Mensagem: {result}".format(result=result.text))
           print(result)
 
       return result.status_code
@@ -46,43 +53,54 @@ class Connection():
 
 class Flows():
     def __init__(self,generator):
-        self.flow = {"flow": [{
-                "id": "5",
-                "cookie": 38,
-                "instructions": {
-                    "instruction": [{
-                            "order": 0,
-                            "apply-actions": {
-                                "action": [{
-                                        "order": 0,
-                                        "drop-action": { }
-                                    }]
-                            }
-                        }]},
-                "hard-timeout": 65000,
-                "match": {
-                    "ethernet-match": {
-                        "ethernet-type": {
-                            "type": 2048
-                        },
-                        "ethernet-source": {
-                            "address" : "fake"
-                        }},
-                    "ipv4-destination": "10.0.0.38/32"
+        self.flow = {
+    "flow": [
+        {   
+            "id": "5",
+            "cookie": 38,
+            "instructions": {
+                "instruction": [
+                    {   
+                        "order": 0,
+                        "apply-actions": {
+                            "action": [
+                                {   
+                                    "order": 0,
+                                    "drop-action": { }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "hard-timeout": 65000,
+            "match": {
+                "ethernet-match": {
+                    "ethernet-type": {
+                        "type": 2048
+                    },
+                    "ethernet-source": {
+                        "address" : "fake"
+                    }
                 },
-                "flow-name": "TestFlow-1",
-                "strict": False,
-                "cookie_mask": 4294967295,
-                "priority": 2,
-                "table_id": 0,
-                "idle-timeout": 65000,
-                "installHw": False
-            }]}
+                "ipv4-destination": "10.0.0.38/32"
+
+            },
+            "flow-name": "TestFlow-1",
+            "strict": False,
+            "cookie_mask": 4294967295,
+            "priority": 2,
+            "table_id": 0,
+            "idle-timeout": 65000,
+            "installHw": False
+        }]} 
+        
+            
         self.generator = generator
 
 
     def createFlow(self):
-        f = flow.copy()
+        f = self.flow.copy()
 
         mac = self.generator.increment()
 
@@ -101,7 +119,7 @@ class Executor(threading.Thread):
       threading.Thread.__init__(self)
 
       self.connection = Connection(of_dev,controller)
-      self.flows = Flows(of_dev,generator)
+      self.flows = Flows(generator)
 
       self.active = True # Variavel de parada da thread
       self.started = False
@@ -155,7 +173,7 @@ class Tester():
 
 
 
-            for n in range(n_threads):
+            for n1 in range(n_threads):
                 t = Executor(of_dev,controller,self.generators[i])
                 self.threads.append(t)
 
@@ -191,3 +209,8 @@ class Tester():
             n_flows += g.mac_value
 
         print("Fluxos enviados: %s" % n_flows)
+
+
+if __name__ == "__main__":
+    t = Tester()
+    t.start()

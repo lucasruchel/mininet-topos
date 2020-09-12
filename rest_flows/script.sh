@@ -1,11 +1,12 @@
 #!/bin/bash
 
-cluster_size=3
+cluster_size=13
 
-repeats=5
+repeats=3
 
-for i in $(seq 0 $repeats); do
+for i in $(seq 1 $repeats); do
 	echo "############################"
+	echo "Controlador: Onos"
 	echo "Tamanho do cluster: $cluster_size"
 	echo "Execucao: $i"
 	echo "############################"
@@ -14,4 +15,4 @@ for i in $(seq 0 $repeats); do
 	
 	# Aguarda alguns segundos para executar novamente
 	sleep 10
-done
+done 

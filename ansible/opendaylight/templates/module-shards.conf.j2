@@ -1,0 +1,38 @@
+module-shards = [
+	{
+		name = "default"
+		shards = [
+			{
+				name = "default"
+				replicas = [{% for ip in cluster_ips %}"member-{{ ip.split('.')[3] }}",{% endfor %}]
+			}
+		]
+	},
+	{
+		name = "inventory"
+		shards = [
+			{
+				name="inventory"
+				replicas = [{% for ip in cluster_ips %}"member-{{ ip.split('.')[3] }}",{% endfor %}]
+			}
+		]
+	},
+	{
+		name = "topology"
+		shards = [
+			{
+				name="topology"
+				replicas = [{% for ip in cluster_ips %}"member-{{ ip.split('.')[3] }}",{% endfor %}]
+			}
+		]
+	},
+	{
+		name = "toaster"
+		shards = [
+			{
+				name="toaster"
+				replicas = [{% for ip in cluster_ips %}"member-{{ ip.split('.')[3] }}",{% endfor %}]
+			}
+		]
+	}
+]

@@ -17,4 +17,4 @@ if len(sys.argv) == 2:
 
 for i in range(executions):
     sendp(Ether(src=generator.increment(), dst="00:00:00:00:00:02")/IP(src="10.1.1.10", dst="10.0.0.2"))
-    time.sleep(0.1)
+    time.sleep(0.001)

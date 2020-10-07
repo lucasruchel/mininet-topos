@@ -17,22 +17,38 @@ import json
 
 from mac_utils import MacGenerator
 
+import copy
+
 class Connection():
    def __init__(self,of_dev,controller):
         self.DEBUG = False
 
         self.session = requests.Session()
 
+        self.auth = HTTPBasicAuth('admin','admin')        # usuario de autenticacao
         self.headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
 
 
         # endereco da API
         self.API = 'http://{node}:8181/restconf/config/opendaylight-inventory:nodes/node/openflow:{of}/table/0/flow/{{id}}'
+        self.MASTERSHIP_API = 'http://{node}:8181/restconf/operational/entity-owners:entity-owners'
+ 
+
+
+        self.MASTERSHIP_API = self.MASTERSHIP_API.format(node=controller)
+
+        controller = self.getMaster()
+
         self.API = self.API.format(node=controller,of=of_dev)
 
-        self.auth = HTTPBasicAuth('admin','admin')        # usuario de autenticacao
+
+
+
 
    def doRequest(self,flow):
+      if self.DEBUG:
+          print(flow)
+     
       url = self.API.format(id=flow['flow'][0]['id'])
 
 #      bug = json.dumps(flow)
@@ -49,14 +65,24 @@ class Connection():
 
       return result.status_code
 
+   def getMaster(self):
+        if self.DEBUG:
+            print("Consultado API para definir o master")
+            print("URL: {url}".format(url=self.MASTERSHIP_API))
 
+        response = self.session.get(self.MASTERSHIP_API, auth=self.auth)
+
+        if response.status_code == requests.codes.ok:
+            r_obj = response.json()
+            for entity in r_obj['entity-owners']['entity-type'][1]['entity']:
+                if str(entity['id']).__contains__("openflow:1"):
+                    return ("192.168.247." + entity['owner'][-3:])
+                    
 
 class Flows():
     def __init__(self,generator):
-        self.flow = {
-    "flow": [
-        {   
-            "id": "5",
+        self.flow = {   
+#            "id": "5",
             "cookie": 38,
             "instructions": {
                 "instruction": [
@@ -93,33 +119,36 @@ class Flows():
             "table_id": 0,
             "idle-timeout": 65000,
             "installHw": False
-        }]} 
+        } 
         
             
         self.generator = generator
 
 
-    def createFlow(self):
-        f = self.flow.copy()
+    def createFlows(self):
+        flows = {'flow' : []}
 
+
+
+    
         mac = self.generator.increment()
+           
+        f = copy.deepcopy(self.flow)
+        f['match']['ethernet-match']['ethernet-source']['address'] = self.generator.format_mac(mac)
+        f['flow-name'] = "TestFlow-%s" % mac
+        f['cookie_mask'] += 1
+        f['cookie'] += 1
+        f['id'] = mac
 
-        f['flow'][0]['match']['ethernet-match']['ethernet-source']['address'] = self.generator.format_mac(mac)
-        f['flow'][0]['flow-name'] = "TestFlow-%s" % mac
-        f['flow'][0]['cookie_mask'] += 1
-        f['flow'][0]['cookie'] += 1
-        f['flow'][0]['id'] = mac
+        flows['flow'].append(f)
 
-        return f
+        return flows
 
 
 
 class Executor(threading.Thread):
    def __init__(self,of_dev,controller,generator):
       threading.Thread.__init__(self)
-
-      self.connection = Connection(of_dev,controller)
-      self.flows = Flows(generator)
 
       self.active = True # Variavel de parada da thread
       self.started = False
@@ -144,73 +173,37 @@ class Tester():
         n - número de controladores
         execution_time - tempo de execução dos testes
     """
-    def __init__(self, n = 3,execution_time = 10):
-        self.threads = []
+    def __init__(self):
 
-        ini_ip = 125
-        self.n = n
-        self.execution_time = execution_time
+        
+        of_dev = "1"
 
-        self.generators = []
+        generator = MacGenerator()
 
+        controller = "192.168.247.125"
+
+        self.connection = Connection(of_dev,controller)
+        self.flows = Flows(generator)
+
+
+
+    def start(self,n):    
+
+        print("Iniciando o envio de {flows} flows ".format(flows=n))
         for i in range(n):
-            # Gerador de MACs sequenciais
-            self.generators.append(MacGenerator())
+            result = self.connection.doRequest(self.flows.createFlows())
 
-            # Dev openflow para envio das regras
-            of_dev=str(i+1)
+        print("Execução completa")
 
-            # Controlador para envio de fluxos
-            controller = "192.168.247.{0}".format(ini_ip + i)
-
-            # tempo de execução em segundos
-            execution_time = 10
-
-            n_threads = 16
-
-            print(of_dev)
-            print(controller)
-
-
-
-            for n1 in range(n_threads):
-                t = Executor(of_dev,controller,self.generators[i])
-                self.threads.append(t)
-
-
-    def start(self):
-        # inicia as threads de envio para todos os controladores
-        for t in self.threads:
-            t.start()
-
-
-        print("iniciando threads de envio de fluxos")
-        for i in range(len(self.threads)):
-            self.threads[i].started = True
-
-
-        t = datetime.now()
-        while((datetime.now() - t).total_seconds() <= self.execution_time):
+#        t = datetime.now()
+#        while((datetime.now() - t).total_seconds() <= self.execution_time):
             #print("Executando à ",(datetime.now() - t).total_seconds())
-            sleep(1)
-        else:
-            # execucao completa
-            print("execucacao completa, parando threads")
+ #           sleep(1)
 
-            for t in self.threads:
-                t.active = False
-
-        for t in self.threads:
-            t.join()
-
-
-        n_flows = 0
-        for g in self.generators:
-            n_flows += g.mac_value
-
-        print("Fluxos enviados: %s" % n_flows)
-
+    def getMaster(self):
+        return self.connection.getMaster()
 
 if __name__ == "__main__":
     t = Tester()
-    t.start()
+
+    t.start(2)

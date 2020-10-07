@@ -1,0 +1,15 @@
+[Unit]
+Description=OpenDaylight Controller
+After=network.target
+
+[Service]
+Type=simple
+User=ti
+Group=ti
+ExecStart={{ odl_path }}startup.sh
+ExecStop={{ odl_path }}{{ odl_basename }}/bin/stop
+Restart=on-failure
+RestartSec=60s
+
+[Install]
+WantedBy=multi-user.target

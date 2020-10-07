@@ -1,0 +1,102 @@
+---
+
+- name: verifica pasta do odl
+  stat:
+      path: "~/{{ odl_filename }}"
+  register: st_onos
+
+- name: copy controllers files
+  get_url:
+      dest: /home/ti/
+      url: "ftp://10.1.255.17/{{ odl_filename }}"
+  when: st_onos.stat.exists == False
+
+- name: verify destination folders
+  file:
+      path: "/home/ti/odl"
+      state: directory
+  register: sfolder
+
+- name: unarchive ODL
+  unarchive:
+      remote_src: yes
+      src: "/home/ti/{{ odl_filename }}"
+      dest: /home/ti/odl
+  when: sfolder.changed
+
+- name: install opendaylight service
+  template:
+          src: opendaylight.service.j2
+          dest: /etc/systemd/system/opendaylight.service
+  become: yes
+
+- name: restart systemd
+  systemd:
+          daemon_reload: yes
+  become: yes
+
+
+- name: verify changed file
+  stat:
+    path: "{{ odl_path }}{{ odl_basename }}/.conf_lock"
+  register: odl_lock
+
+- block:
+    - name: configure ODL startup options
+      command: sed -i.orig etc/org.apache.karaf.features.cfg \
+        -e 's/^\(featuresRepositories\) *= *\(.*\)$/\1 = \2,\\\n  file:\${karaf.etc}\/4c3edce7-5493-4cf1-9ad2-5f054e889a28.xml,\\\n  \${karaf.features.repositories}/' \
+        -e 's/^\(featuresBoot\) *= *\(.*\)$/\1 = \2,\\\n  3b0c66bc-9afc-429f-9dda-884da9f86221,\\\n  \${karaf.features.boot}/'
+      args:
+        chdir: "{{ odl_path }}{{ odl_basename }}"
+
+    - name: configure ODL startup options 2
+      command: sed -i.orig bin/karaf \
+        -e 's/^\( *\)\(-Dkaraf.etc="\${KARAF_ETC}"\)\( *\\\)$/\1\2\3\n\1-Dkaraf.features.repositories="\${KARAF_FEATURES_REPOSITORIES}"\3\n\1-Dkaraf.features.boot="\${KARAF_FEATURES_BOOT}"\3/'
+      args:
+        chdir: "{{ odl_path }}{{ odl_basename }}"
+
+    - name: create initial configuration directory
+      file:
+        state: directory
+        path: "{{ odl_path }}{{ odl_basename }}/configuration/initial/"
+
+    - name: copy configuration file to etc/
+      copy:
+        src: 4c3edce7-5493-4cf1-9ad2-5f054e889a28.xml
+        dest: "{{ odl_path }}{{ odl_basename }}/etc/4c3edce7-5493-4cf1-9ad2-5f054e889a28.xml"
+
+    - name: create changed file
+      file:
+        path: "{{ odl_path }}{{ odl_basename }}/.conf_lock"
+        state: touch
+      register: odl_lock
+
+  when: odl_lock.stat.exists == False
+
+
+- name: copy module-shards
+  template:
+      src: module-shards.conf.j2
+      dest: "{{ odl_path }}{{ odl_basename }}/configuration/initial/module-shards.conf"
+
+- name: copy template akka.conf
+  template:
+      src: akka.conf.j2
+      dest: "{{ odl_path }}{{ odl_basename }}/configuration/initial/akka.conf"
+
+- name: copy startup script
+  template:
+      src: startup.sh.j2
+      dest: "{{ odl_path }}/startup.sh"
+      mode: 0744
+      owner: ti
+
+- name: create folder ~/.m2
+  file:
+      state: directory
+      path: /home/ti/.m2
+
+- name: copy settings.xml
+  copy:
+      src: settings.xml
+      dest: /home/ti/.m2/

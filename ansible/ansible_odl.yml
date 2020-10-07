@@ -1,0 +1,9 @@
+---
+
+- hosts: all
+  become: false
+  become_method: sudo
+  remote_user: ti
+
+  roles:
+      - opendaylight

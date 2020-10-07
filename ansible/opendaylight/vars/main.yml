@@ -1,0 +1,10 @@
+---
+# vars file for opendaylight
+
+odl_filename: opendaylight-0.12.0.tar.gz
+
+odl_basename: opendaylight-0.12.0
+odl_path: /home/ti/odl/
+cluster_size: 3
+cluster_initial: ip
+cluster_ip_prefix: 192.168.247.

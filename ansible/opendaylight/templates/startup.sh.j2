@@ -1,0 +1,12 @@
+#!/bin/bash
+
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export PATH=$JAVA_HOME/bin:/usr/local/bin:/usr/bin:/bin
+export JAVA_MAX_MEM=12G
+export JAVA_MAX_PERM_MEM=512m
+
+export KARAF_FEATURES_BOOT=odl-openflowplugin-drop-test,odl-restconf-all,odl-openflowplugin-flow-services-rest,odl-openflowplugin-app-table-miss-enforcer
+
+{{ odl_path }}{{ odl_basename }}/bin/set_persistence.sh off
+
+{{ odl_path }}{{ odl_basename }}/bin/karaf server

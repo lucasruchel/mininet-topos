@@ -217,7 +217,7 @@ class Tester():
         if (self.DEBUG):
             print(backups)
 
-
+        print("backups: {backups}".format(backups=backups))
 
         content = {'flows': generated_flows }
 

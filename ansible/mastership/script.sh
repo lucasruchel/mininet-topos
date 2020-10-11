@@ -31,6 +31,8 @@ cd $curr_dir
 for r in $(seq 1 5); do
 
 echo "##########################################"
+echo "Experimento: ODL - mastership"
+echo "##########################################"
 echo "execucação: $r"
 echo "size: $i"
 echo "fluxos $f"
@@ -43,15 +45,20 @@ for j in $(seq 1 $i); do
 	ssh ti@192.168.247.$((124+$j)) sudo systemctl start opendaylight
 done
 
+# For para ativação de aplicação que gera regras de fluxos
+for j in $(seq 1 $i); do
+	ip="192.168.247.$((124+$j))"
+	echo "dropallflows.. -  $ip"
+	sshpass -p karaf ssh -p 8101 karaf@$ip dropallpacketsrpc on
+done
 
+sleep 120
 
-
-sleep 300
-
-sudo tcpdump  -w /mnt/odl_size-$i-exec-$r-flows-$f-mininet.pcap -i eno1 &
+# Captura o trafego
+sudo tcpdump  -w /mnt/odl_size-$i-exec-$r-flows-$f-mastership.pcap -i eno1 &
 
 # Cria topologia
-sudo /home/ti/testes/linear.py $i $f 2>&1 > dados/mininet-cluster_size-$i-exec-$r-flows-$f.log
+sudo /home/ti/testes/linear_mastership.py $i $f 2>&1 > dados/mininet-cluster_size-$i-exec-$r-flows-$f.log
 
 
 

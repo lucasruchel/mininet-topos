@@ -25,7 +25,7 @@ from odl_sincronization import Tester
 controllers = []
 
 def host_send(node):
-    node.cmdPrint("/home/ti/testes/scapy-test.py","10000")
+    node.cmdPrint("/home/ti/testes/scapy-test.py","20000")
 
 
 
@@ -58,6 +58,10 @@ def topology(n=3,flows_number=128):
 
     # Envio de mensagens 1000 pcks_in/s
     t = Thread(target=host_send, args=[h1s1,])
+    t.start()
+
+    # Pausa para contagem de fluxos
+    time.sleep(5)
 
     # comando para parar servico remoto
     print(os.popen("sudo -u ti ssh ti@{master} sudo systemctl stop opendaylight".format(master=master)))
